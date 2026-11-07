@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}StatAssist AI - Upload and Analyze Your Datasets{% endblock %}
+
+{% block content %}
+<!-- Main page container with sticky footer styling -->
+<div class="d-flex flex-column min-vh-100 bg-background-light">
+    <!-- Reusable Navbar Component -->
+    {% include 'components/navbar.html' %}
+    
+    <!-- Reusable Progress Stepper Component -->
+    {% include 'components/progress_stepper.html' %}
+    
+    <!-- Main Body Content -->
+    <main class="flex-grow-1">
+        <!-- Reusable Hero Messaging Section -->
+        {% include 'components/hero.html' %}
+        {% include 'components/mode_selector.html' %}
+        
+        <!-- Reusable Upload Card Section -->
+        {% include 'components/upload_card.html' %}
+        {% include 'components/research_question.html' %}
+        {% include 'components/dependency_question.html' %}
+        {% include 'components/interpretation.html' %}
+        {% include 'components/visualization.html' %}
+    </main>
+    
+    <!-- Reusable Footer Component -->
+    {% include 'components/footer.html' %}
+</div>
+{% endblock %}

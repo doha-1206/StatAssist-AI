@@ -1,0 +1,442 @@
+/* StatAssist AI CSS Custom Design System */
+:root {
+    /* Color Palette */
+    --primary-blue: #2563EB;
+    --primary-blue-hover: #1D4ED8;
+    --primary-blue-light: #EFF6FF;
+    
+    --dark-navy: #0F172A;
+    --navy-hover: #1E293B;
+    
+    --bg-light: #F8FAFC;
+    --white: #FFFFFF;
+    
+    --success-green: #15803D; /* Darker green to pass AA/AAA contrast rules */
+    --success-green-light: #DCFCE7; /* Light pastel green for backgrounds */
+    
+    --text-navy: #0F172A;
+    --text-secondary: #475569;
+    --text-muted: #64748B;
+    
+    --border-color: #E2E8F0;
+    --border-color-focus: #3B82F6;
+    
+    /* Layout Constants */
+    --transition-speed: 0.2s;
+}
+
+/* Global Resets & Document Defaults */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text-navy);
+    background-color: var(--bg-light);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+}
+
+/* Brand Logo Text Style */
+.logo-text {
+    letter-spacing: -0.02em;
+}
+
+/* Utility Helpers */
+.text-navy {
+    color: var(--dark-navy) !important;
+}
+
+.text-primary-blue {
+    color: var(--primary-blue) !important;
+}
+
+.text-success-green {
+    color: var(--success-green) !important;
+}
+
+.bg-success-light {
+    background-color: var(--success-green-light) !important;
+}
+
+.bg-success-green {
+    background-color: var(--success-green) !important;
+}
+
+.bg-background-light {
+    background-color: var(--bg-light);
+}
+
+.text-secondary-custom {
+    color: var(--text-secondary) !important;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.tracking-tight {
+    letter-spacing: -0.025em;
+}
+
+/* Custom Buttons */
+.btn-primary-blue {
+    background-color: var(--primary-blue);
+    color: var(--white);
+    border: 1px solid var(--primary-blue);
+}
+
+.btn-primary-blue:hover, 
+.btn-primary-blue:focus-visible {
+    background-color: var(--primary-blue-hover);
+    color: var(--white);
+    border-color: var(--primary-blue-hover);
+}
+
+.btn-navy {
+    background-color: var(--dark-navy);
+    color: var(--white);
+    border: 1px solid var(--dark-navy);
+}
+
+.btn-navy:hover, 
+.btn-navy:focus-visible {
+    background-color: var(--navy-hover);
+    color: var(--white);
+    border-color: var(--navy-hover);
+}
+
+/* Focus outlines for accessible keyboard navigation */
+a:focus-visible,
+button:focus-visible,
+.dropzone:focus-visible,
+input:focus-visible {
+    outline: 2.5px solid var(--border-color-focus);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+}
+
+/* Core Card Aesthetics (Notion / OpenAI style) */
+.card {
+    border: 1px solid var(--border-color) !important;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Stepper Component Design */
+.step-circle {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    font-size: 0.9rem;
+    border: 2px solid var(--border-color);
+    background-color: var(--white);
+    color: var(--text-muted);
+    transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.step-item.active .step-circle {
+    border-color: var(--primary-blue);
+    background-color: var(--primary-blue);
+    color: var(--white);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+}
+
+.step-item.active .step-title {
+    color: var(--dark-navy) !important;
+}
+
+/* Completed Step style (Success green checkmark) */
+.step-item.completed .step-circle {
+    border-color: var(--success-green);
+    background-color: var(--success-green);
+    color: var(--white);
+    box-shadow: none;
+}
+
+.step-item.completed .step-title {
+    color: var(--success-green) !important;
+}
+
+.step-line {
+    height: 1px;
+    background-color: var(--border-color);
+    transition: background-color 0.4s ease, height 0.4s ease;
+}
+
+/* Completed connection line becomes primary blue */
+.step-line.completed {
+    background-color: var(--primary-blue);
+    height: 2px;
+}
+
+/* Dropzone (Drag-and-Drop Area) */
+.dropzone {
+    border-color: var(--border-color) !important;
+    background-color: var(--white);
+    transition: border-color var(--transition-speed) ease, background-color var(--transition-speed) ease, transform var(--transition-speed) ease;
+}
+
+.dropzone-large {
+    min-height: 380px;
+    border-width: 2px !important;
+}
+
+.dropzone:hover, 
+.dropzone.dragover,
+.dropzone:focus-visible {
+    border-color: var(--primary-blue) !important;
+    background-color: var(--primary-blue-light);
+    transform: translateY(-2px);
+}
+
+/* Hover support in Navbar links */
+.navbar-nav .nav-link {
+    transition: color var(--transition-speed) ease;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--dark-navy) !important;
+}
+
+.hover-navy:hover {
+    color: var(--dark-navy) !important;
+    text-decoration: underline !important;
+}
+
+/* Animations classes */
+.transition-all {
+    transition: all var(--transition-speed) ease-in-out;
+}
+
+/* Layout Adjustments for Stepper on Mobile viewports */
+@media (max-width: 767.98px) {
+    .step-item {
+        width: 100%;
+    }
+}
+
+/* Center Hero Logo Styles & Animations */
+.hero-logo-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1.5rem !important; /* Balanced spacing naturally above title */
+}
+
+.hero-logo {
+    width: 220px; /* Keep proportions, approx 180-220px width */
+    height: auto;
+    object-fit: contain;
+    /* Soft shadow beneath the logo for premium floating appearance */
+    filter: drop-shadow(0 12px 24px rgba(37, 99, 235, 0.08)) 
+            drop-shadow(0 4px 8px rgba(15, 23, 42, 0.03));
+    
+    /* Short elegant entrance animation */
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+    animation: logoEntrance 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Entrance Keyframes: Fade in + slight upward slide + scale */
+@keyframes logoEntrance {
+    0% {
+        opacity: 0;
+        transform: translateY(12px) scale(0.96);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Accessibility: respect user prefers-reduced-motion settings */
+@media (prefers-reduced-motion: reduce) {
+    .hero-logo {
+        animation: logoFadeInOnly 0.6s ease forwards !important;
+        transform: none !important;
+    }
+}
+
+@keyframes logoFadeInOnly {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+/* Compact layout & Spacing Refinements */
+.stepper-wrapper {
+    margin-bottom: 0.25rem !important;
+}
+
+.hero-section {
+    padding-top: 1rem !important;
+    padding-bottom: 0.5rem !important;
+}
+
+.hero-section h1 {
+    margin-bottom: 0.25rem !important;
+}
+
+.hero-section .h4 {
+    margin-bottom: 0.5rem !important;
+}
+
+.hero-section .lead {
+    margin-bottom: 1.25rem !important;
+}
+
+.upload-section {
+    padding-top: 0.25rem !important;
+    padding-bottom: 3.5rem !important;
+}
+
+/* Fixed Progress Stepper */
+/* Professional Sticky Stepper */
+.stepper-wrapper {
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+    background-color: #f8f9fa;
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+/* Interpretation Content Styling */
+
+#interpretation-content h1,
+#interpretation-content h2,
+#interpretation-content h3,
+#interpretation-content h4,
+#interpretation-content h5,
+#interpretation-content h6 {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    line-height: 1.5 !important;
+    color: #1e3a5f !important;
+    margin-top: 16px !important;
+    margin-bottom: 8px !important;
+}
+
+#interpretation-content p {
+    font-size: 14px !important;
+    line-height: 1.8 !important;
+    margin-bottom: 10px !important;
+}
+
+#interpretation-content ul,
+#interpretation-content ol {
+    padding-left: 22px;
+    margin-bottom: 12px;
+}
+
+#interpretation-content li {
+    font-size: 14px !important;
+    line-height: 1.8 !important;
+    margin-bottom: 5px !important;
+}
+
+#interpretation-content strong {
+    font-weight: 600;
+}
+
+
+/* Research Question Textarea */
+
+#research-question {
+    text-align: center !important;
+    direction: auto;
+}
+
+/* Placeholder */
+
+#research-question::placeholder {
+    text-align: center;
+    opacity: 0.7;
+}
+
+/* Analyze Button Center */
+
+#btn-next-question {
+    display: block;
+    margin: 20px auto 0 auto;
+}
+
+
+
+
+/* =====================================
+   Fixed Navbar
+===================================== */
+
+.navbar {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 65px;
+    min-height: 65px;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    z-index: 1050;
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+body {
+    padding-top: 65px;
+}
+
+/* =====================================
+   Sticky Stepper Wrapper
+===================================== */
+
+
+/* Stepper Wrapper */
+
+.stepper-wrapper {
+    position: sticky;
+    top: 65px;
+    z-index: 1040;
+    background-color: #f8f9fa;
+
+    padding-top: 4px !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 12px !important;
+}
+
+/* Stepper Container */
+
+.stepper {
+    position: static !important;
+
+    padding: 24px !important;
+    gap: 12px !important;
+
+    border: 1.5px solid #343a40 !important;
+    border-radius: 16px !important;
+
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08) !important;
+
+    background-color: #ffffff !important;
+}
+
+/* Step Circles */
+
+.step-circle {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    font-size: 15px;
+}
+
+/* Step Titles */
+
+.step-title {
+    font-size: 14px;
+    line-height: normal;
+}
+
+/* Step Subtitles */
+
+.step-subtitle {
+    font-size: 12px !important;
+    line-height: normal;
+}
+
