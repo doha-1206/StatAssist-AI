@@ -440,3 +440,24 @@ body {
     line-height: normal;
 }
 
+
+
+/* Vertical borders between columns */
+.table th,
+.table td {
+    border-right: 2px solid #4b5563 !important;
+}
+
+/* Column header cells */
+.table thead th {
+    padding: 14px 20px !important;
+    border: 2px solid #4b5563 !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    font-size: inherit !important;
+}
+
+/* Remove the extra right border from the last data column */
+.table td:last-child {
+    border-right: none !important;
+}
