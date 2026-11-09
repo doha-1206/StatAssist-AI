@@ -1170,7 +1170,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
             });
 
-            const data = await response.json();
+            let data = {};
+
+            try {
+                data = await response.json();
+            } catch (error) {
+                console.error('Upload response is not JSON:', error);
+            }
+
+            // Handle file size limit
+            if (response.status === 413 || data.error_type === 'dataset_limit') {
+                showDatasetLimitModal(
+                    data.message || 'File size exceeds the maximum allowed limit of 20 MB.'
+                );
+
+                fileInput.value = '';
+                return;
+            }
 
 
             // Check dataset limits
