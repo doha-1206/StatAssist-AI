@@ -1,5 +1,10 @@
 from langchain_core.prompts import PromptTemplate
 
+
+####################################################
+# QUESTION ANALYSIS PROMPT
+####################################################
+
 QUESTION_ANALYSIS_PROMPT = PromptTemplate(
     input_variables=["metadata", "question"],
     template="""
@@ -13,15 +18,49 @@ Your tasks:
 
 1. Understand the user's statistical intent.
 
-2. Select EXACTLY TWO statistical columns that best match
-the user's question.
+2. Identify ALL statistical columns mentioned or requested
+in the user's question.
 
-Rules:
+IMPORTANT:
+- Identify every distinct dataset column relevant to the question.
+- Do NOT limit the number of selected columns to two.
+- Do NOT ignore additional variables mentioned in the question.
+- Do NOT remove a variable just because two other variables
+  have already been identified.
+- If the user mentions three variables, return all three.
+- If the user mentions four variables, return all four.
+- Preserve the order in which the variables appear in the question.
 - Selected columns MUST exist exactly in the metadata.
 - Never invent or modify column names.
 - Do not select an identifier as a statistical column unless
   the user explicitly asks about it.
-- Return exactly two columns whenever possible.
+- Do not include unrelated columns.
+
+Examples:
+
+Question:
+"Is there a relationship between Age and Income?"
+
+Return:
+"columns": ["Age", "Income"]
+
+Question:
+"Is there a relationship between Age, Department and Gender?"
+
+Return:
+"columns": ["Age", "Department", "Gender"]
+
+Question:
+"Compare Salary, Age, Department and Gender."
+
+Return:
+"columns": ["Salary", "Age", "Department", "Gender"]
+
+Question:
+"Compare Before and After."
+
+Return:
+"columns": ["Before", "After"]
 
 3. Identify a possible identifier column.
 
@@ -37,7 +76,7 @@ ID, Identifier, Subject_ID, Patient_ID, Participant_ID,
 Customer_ID, Student_ID, Case_ID, Record_ID, Person_ID.
 
 Rules:
-- The identifier is separate from the two statistical columns.
+- The identifier is separate from the statistical columns.
 - It MUST exist exactly in the metadata if returned.
 - If there is no suitable identifier, return null.
 - Never invent an identifier.
@@ -51,11 +90,12 @@ Allowed values:
 - relationship
 
 IMPORTANT:
-You ONLY identify the statistical intent, columns,
+You ONLY identify the statistical intent, all relevant columns,
 identifier, and analysis type.
 
 Do NOT select a statistical test.
 Do NOT select a visualization.
+Do NOT reduce the number of columns to two.
 
 Return ONLY valid JSON.
 Do NOT explain anything.
@@ -70,24 +110,14 @@ If suitable columns cannot be identified, return:
     "identifier": null
 }}
 
-Otherwise return:
+Otherwise return all identified columns:
 
 {{
-    "analysis_type": "comparison",
+    "analysis_type": "relationship",
     "columns": [
-        "Before",
-        "After"
-    ],
-    "identifier": "Patient_ID"
-}}
-
-If no identifier exists:
-
-{{
-    "analysis_type": "comparison",
-    "columns": [
-        "Before",
-        "After"
+        "Age",
+        "Department",
+        "Gender"
     ],
     "identifier": null
 }}

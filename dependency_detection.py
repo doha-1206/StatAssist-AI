@@ -362,3 +362,95 @@ def check_dependency_evidence(
         "pair_status": pair_status
 
     }
+
+
+def detect_before_after_columns(df, selected_columns):
+    """
+    Detect Before/After structure in Wide or Long format.
+    """
+
+    if len(selected_columns) != 2:
+        return None
+
+    col1, col2 = selected_columns
+
+    before_keywords = [
+        "before", "pre", "pre_test",
+        "pretest", "pre_score", "baseline"
+    ]
+
+    after_keywords = [
+        "after", "post", "post_test",
+        "posttest", "post_score",
+        "followup", "follow_up"
+    ]
+
+    # ==========================================
+    # 1. Detect Wide Format
+    # ==========================================
+
+    col1_lower = col1.lower()
+    col2_lower = col2.lower()
+
+    col1_before = any(k in col1_lower for k in before_keywords)
+    col1_after = any(k in col1_lower for k in after_keywords)
+
+    col2_before = any(k in col2_lower for k in before_keywords)
+    col2_after = any(k in col2_lower for k in after_keywords)
+
+    if col1_before and col2_after:
+        return {
+            "data_format": "wide",
+            "before_column": col1,
+            "after_column": col2
+        }
+
+    if col2_before and col1_after:
+        return {
+            "data_format": "wide",
+            "before_column": col2,
+            "after_column": col1
+        }
+
+    # ==========================================
+    # 2. Detect Long Format
+    # ==========================================
+
+    for numeric_col, condition_col in [
+        (col1, col2),
+        (col2, col1)
+    ]:
+
+        if numeric_col not in df.columns or condition_col not in df.columns:
+            continue
+
+        # Preserve original values
+        original_values = (
+            df[condition_col]
+            .dropna()
+            .astype(str)
+            .str.strip()
+        )
+
+        # Normalize only for detection
+        normalized_values = original_values.str.lower()
+
+        before_match = normalized_values.isin([
+            "before", "pre", "pre-test", "pretest"
+        ])
+
+        after_match = normalized_values.isin([
+            "after", "post", "post-test", "posttest"
+        ])
+
+        if before_match.any() and after_match.any():
+
+            return {
+                "data_format": "long",
+                "condition_column": condition_col,
+                "numeric_column": numeric_col,
+                "before_value": original_values[before_match].iloc[0],
+                "after_value": original_values[after_match].iloc[0]
+            }
+
+    return None

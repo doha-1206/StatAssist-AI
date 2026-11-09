@@ -1,5 +1,4 @@
 
-
 document.addEventListener('DOMContentLoaded', () => {
 
     // =====================================
@@ -71,68 +70,65 @@ document.addEventListener('DOMContentLoaded', () => {
     // Save Interpretation Mode
     // =====================================
 
-    // =====================================
-// Save Interpretation Mode
-// =====================================
 
-const modeOptions = document.querySelectorAll(
-    'input[name="interpretation-mode"]'
-);
-
-async function saveInterpretationMode(mode) {
-
-    try {
-
-        const response = await fetch('/set-mode', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                mode: mode
-            })
-        });
-
-        const result = await response.json();
-
-        if (!response.ok || !result.success) {
-            console.error('Could not save mode:', result);
-            return false;
-        }
-
-        console.log('Interpretation mode saved:', result.mode);
-
-        return true;
-
-    } catch (error) {
-
-        console.error('Mode saving error:', error);
-
-        return false;
-    }
-}
-
-
-    // Save mode whenever the user changes it
-
-    modeOptions.forEach(option => {
-
-    option.addEventListener('change', () => {
-        saveInterpretationMode(option.value);
-    });
-
-    });
-
-
-    // Synchronize the initially selected mode with Flask
-
-    const initialMode = document.querySelector(
-    'input[name="interpretation-mode"]:checked'
+    const modeOptions = document.querySelectorAll(
+        'input[name="interpretation-mode"]'
     );
 
-    if (initialMode) {
-    saveInterpretationMode(initialMode.value);
+    async function saveInterpretationMode(mode) {
+
+        try {
+
+            const response = await fetch('/set-mode', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    mode: mode
+                })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok || !result.success) {
+                console.error('Could not save mode:', result);
+                return false;
+            }
+
+            console.log('Interpretation mode saved:', result.mode);
+
+            return true;
+
+        } catch (error) {
+
+            console.error('Mode saving error:', error);
+
+            return false;
+        }
     }
+
+
+        // Save mode whenever the user changes it
+
+        modeOptions.forEach(option => {
+
+        option.addEventListener('change', () => {
+            saveInterpretationMode(option.value);
+        });
+
+        });
+
+
+        // Synchronize the initially selected mode with Flask
+
+        const initialMode = document.querySelector(
+        'input[name="interpretation-mode"]:checked'
+        );
+
+        if (initialMode) {
+        saveInterpretationMode(initialMode.value);
+        }
 
 
     // =====================================
@@ -526,7 +522,6 @@ async function saveInterpretationMode(mode) {
     async function displayVisualization(data) {
 
         // Move to Visualization
-
         setStepper(6);
 
         if (!visualizationSection) {
@@ -541,7 +536,6 @@ async function saveInterpretationMode(mode) {
         visualizationError?.classList.add('d-none');
 
         // Check if visualization was generated
-
         if (!data.visualization) {
 
             visualizationLoading?.classList.add('d-none');
@@ -561,7 +555,6 @@ async function saveInterpretationMode(mode) {
         }
 
         // Check Plotly availability
-
         if (typeof Plotly === 'undefined') {
 
             visualizationLoading?.classList.add('d-none');
@@ -577,13 +570,11 @@ async function saveInterpretationMode(mode) {
         try {
 
             // Clear previous chart
-
             visualizationContent.innerHTML = '';
 
             const figure = data.visualization;
 
             // Create chart container
-
             const chartContainer = document.createElement('div');
 
             chartContainer.className = 'visualization-chart';
@@ -591,7 +582,6 @@ async function saveInterpretationMode(mode) {
             visualizationContent.appendChild(chartContainer);
 
             // Make chart responsive
-
             const layout = {
                 ...figure.layout,
                 autosize: true
@@ -600,7 +590,6 @@ async function saveInterpretationMode(mode) {
             delete layout.width;
 
             // Render Plotly chart
-
             await Plotly.react(
                 chartContainer,
                 figure.data,
@@ -612,7 +601,6 @@ async function saveInterpretationMode(mode) {
             );
 
             // Show chart name in Learning Mode only
-
             if (data.mode === 'learning') {
 
                 const traces = figure.data || [];
@@ -633,11 +621,16 @@ async function saveInterpretationMode(mode) {
                     trace => trace.type === 'bar'
                 );
 
+                // Get Plotly figure title
+                const figureTitle =
+                    typeof figure.layout?.title === 'string'
+                        ? figure.layout.title
+                        : figure.layout?.title?.text || '';
+
                 let chartName = '';
                 let chartDescription = '';
 
                 // Scatter with Marginal Distributions
-
                 if (
                     hasScatter &&
                     (hasHistogram || hasBox)
@@ -652,7 +645,6 @@ async function saveInterpretationMode(mode) {
                 }
 
                 // Stacked Bar Chart
-
                 else if (
                     hasBar &&
                     figure.layout?.barmode === 'stack'
@@ -663,7 +655,6 @@ async function saveInterpretationMode(mode) {
                 }
 
                 // Grouped Bar Chart
-
                 else if (
                     hasBar &&
                     figure.layout?.barmode === 'group'
@@ -674,23 +665,41 @@ async function saveInterpretationMode(mode) {
                 }
 
                 // Ordinary Bar Chart
-
                 else if (hasBar) {
 
                     chartName = 'Bar Chart';
 
                 }
 
-                // Histogram
+                // Dependent Wide Format
+                else if (
+                    hasHistogram &&
+                    figureTitle.includes('Paired Differences')
+                ) {
 
+                    chartName =
+                        'paired Histogram Plot';
+
+                }
+
+                // Dependent Long Format
+                else if (
+                    hasBox &&
+                    figureTitle.includes('Before vs After')
+                ) {
+
+                    chartName = 'Paired Box Plot';
+
+                }
+
+                // Ordinary Histogram
                 else if (hasHistogram) {
 
                     chartName = 'Histogram';
 
                 }
 
-                // Box Plot
-
+                // Ordinary Box Plot
                 else if (hasBox) {
 
                     chartName = 'Box Plot';
@@ -698,7 +707,6 @@ async function saveInterpretationMode(mode) {
                 }
 
                 // Ordinary Scatter Plot
-
                 else if (hasScatter) {
 
                     chartName = 'Scatter Plot';
@@ -706,7 +714,6 @@ async function saveInterpretationMode(mode) {
                 }
 
                 // Fallback
-
                 else {
 
                     chartName = 'Statistical Visualization';
@@ -714,7 +721,6 @@ async function saveInterpretationMode(mode) {
                 }
 
                 // Create chart information below the plot
-
                 const chartInfo = document.createElement('div');
 
                 chartInfo.className =
@@ -730,7 +736,6 @@ async function saveInterpretationMode(mode) {
                 chartInfo.appendChild(title);
 
                 // Add description only for composite Scatter Plot
-
                 if (chartDescription) {
 
                     const description = document.createElement('p');
@@ -751,12 +756,14 @@ async function saveInterpretationMode(mode) {
             visualizationLoading?.classList.add('d-none');
 
             // Mark Visualization as completed
-
             setStepper(7);
 
         } catch (error) {
 
-            console.error('Plotly Rendering Error:', error);
+            console.error(
+                'Plotly Rendering Error:',
+                error
+            );
 
             visualizationLoading?.classList.add('d-none');
 
@@ -776,16 +783,92 @@ async function saveInterpretationMode(mode) {
 
 
 
+    
     // =====================================
     // Analyze Research Question
     // =====================================
+
+    // Show Error Modal
+    function showQuestionErrorModal(message, question) {
+
+        const isArabic = /[\u0600-\u06FF]/.test(question);
+
+        const modalElement = document.getElementById(
+            'questionErrorModal'
+        );
+
+        const titleElement = document.getElementById(
+            'questionErrorTitle'
+        );
+
+        const messageElement = document.getElementById(
+            'questionErrorMessage'
+        );
+
+        if (!modalElement || !titleElement || !messageElement) {
+            alert(message);
+            return;
+        }
+
+        titleElement.textContent = isArabic
+            ? 'سؤال البحث غير مدعوم'
+            : 'Unsupported Research Question';
+
+        messageElement.textContent = message;
+
+        messageElement.dir = isArabic ? 'rtl' : 'ltr';
+        titleElement.dir = isArabic ? 'rtl' : 'ltr';
+
+        const errorModal = bootstrap.Modal.getOrCreateInstance(
+            modalElement
+        );
+
+        errorModal.show();
+    }
+
+    // =====================================
+    // Dataset Limit Error Modal
+    // =====================================
+
+    function showDatasetLimitModal(message) {
+
+        const modalElement = document.getElementById(
+            'questionErrorModal'
+        );
+
+        const titleElement = document.getElementById(
+            'questionErrorTitle'
+        );
+
+        const messageElement = document.getElementById(
+            'questionErrorMessage'
+        );
+
+        if (!modalElement || !titleElement || !messageElement) {
+            alert(message);
+            return;
+        }
+
+        titleElement.textContent = 'Dataset Limit Exceeded';
+
+        messageElement.textContent = message;
+
+        titleElement.dir = 'ltr';
+        messageElement.dir = 'ltr';
+
+        const errorModal = bootstrap.Modal.getOrCreateInstance(
+            modalElement
+        );
+
+        errorModal.show();
+    }
+
 
     if (nextQuestionButton && questionInput) {
 
         nextQuestionButton.addEventListener('click', async () => {
 
             const question = questionInput.value.trim();
-
 
             if (!question) {
 
@@ -794,14 +877,11 @@ async function saveInterpretationMode(mode) {
                 questionInput.focus();
 
                 return;
-
             }
-
 
             nextQuestionButton.disabled = true;
 
             nextQuestionButton.textContent = 'Analyzing...';
-
 
             try {
 
@@ -819,9 +899,7 @@ async function saveInterpretationMode(mode) {
 
                 });
 
-
                 const data = await response.json();
-
 
                 if (!response.ok || !data.success) {
 
@@ -831,16 +909,13 @@ async function saveInterpretationMode(mode) {
 
                 }
 
-
                 // Save research question information
 
                 window.questionAnalysis = data.analysis;
 
                 window.dependencyEvidence = data.dependency;
 
-
                 const dependency = data.dependency;
-
 
                 if (!dependency) {
 
@@ -850,21 +925,17 @@ async function saveInterpretationMode(mode) {
 
                 }
 
-
                 // Detect question language
 
                 const language = detectLanguage(question);
-
 
                 // Reset previous dependency selection
 
                 window.dependencyType = null;
 
-
                 // Hide dependency section initially
 
                 dependencySection?.classList.add('d-none');
-
 
                 const yesButton = document.getElementById(
                     'dependency-yes'
@@ -874,13 +945,11 @@ async function saveInterpretationMode(mode) {
                     'dependency-no'
                 );
 
-
                 // Reset buttons
 
                 if (yesButton) yesButton.disabled = false;
 
                 if (noButton) noButton.disabled = false;
-
 
                 // No dependency evidence:
                 // Automatically use Independent
@@ -891,9 +960,7 @@ async function saveInterpretationMode(mode) {
                         'Dependency Type: Independent'
                     );
 
-
                     await startAnalysis('independent');
-
 
                 } else {
 
@@ -911,16 +978,13 @@ async function saveInterpretationMode(mode) {
 
                     }
 
-
                     // Display question in the user's language
 
                     updateDependencyLanguage(language);
 
-
                     // Show dependency question
 
                     dependencySection.classList.remove('d-none');
-
 
                     dependencySection.scrollIntoView({
 
@@ -929,7 +993,6 @@ async function saveInterpretationMode(mode) {
                         block: 'center'
 
                     });
-
 
                     // Yes = Dependent
 
@@ -946,7 +1009,6 @@ async function saveInterpretationMode(mode) {
                         await startAnalysis('dependent');
 
                     };
-
 
                     // No = Independent
 
@@ -966,16 +1028,17 @@ async function saveInterpretationMode(mode) {
 
                 }
 
-
             } catch (error) {
 
-                alert(error.message);
+                showQuestionErrorModal(
+                    error.message,
+                    question
+                );
 
                 console.error(
                     'Question Analysis Error:',
                     error
                 );
-
 
             } finally {
 
@@ -988,7 +1051,6 @@ async function saveInterpretationMode(mode) {
         });
 
     }
-
 
 
     // =====================================
@@ -1108,15 +1170,34 @@ async function saveInterpretationMode(mode) {
 
             });
 
+            const data = await response.json();
 
-            if (!response.ok) {
 
-                throw new Error('Upload failed.');
+            // Check dataset limits
+
+            if (data.error_type === 'dataset_limit') {
+
+                showDatasetLimitModal(
+                    data.message ||
+                    'Dataset exceeds the allowed limits.'
+                );
+
+                fileInput.value = '';
+
+                return;
 
             }
 
 
-            const data = await response.json();
+            // Check other upload errors
+
+            if (!response.ok || !data.success) {
+
+                throw new Error(
+                    data.message || 'Could not process file.'
+                );
+
+            }
 
 
             if (!data.success) {

@@ -41,3 +41,42 @@
         </div>
     </div>
 </section>
+
+<!-- Research Question Error Modal -->
+<div
+    class="modal fade"
+    id="questionErrorModal"
+    tabindex="-1"
+    aria-labelledby="questionErrorTitle"
+    aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow">
+
+            <div class="modal-body text-center p-4">
+
+                <div class="mb-3">
+                    <i class="bi bi-exclamation-triangle-fill text-warning"
+                       style="font-size: 42px;"></i>
+                </div>
+
+                <h5 class="fw-bold mb-3" id="questionErrorTitle">
+                    Unsupported Research Question
+                </h5>
+
+                <p id="questionErrorMessage"
+                   class="text-muted mb-4">
+                </p>
+
+                <button
+                    type="button"
+                    class="btn btn-primary-blue px-4"
+                    data-bs-dismiss="modal">
+                    OK
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+</div>

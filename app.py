@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, jsonify, session, send_file
 from services.preprocessing_service import preprocess_dataset
 from pathlib import Path
 from werkzeug.utils import secure_filename
+from werkzeug.exceptions import RequestEntityTooLarge
 from dependency_detection import check_dependency_evidence
 from visualization import visualize
 import json
@@ -51,6 +52,13 @@ app.secret_key = os.getenv("SECRET_KEY")
 UPLOAD_FOLDER = "uploads"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
+# Maximum upload size: 20 MB
+app.config["MAX_CONTENT_LENGTH"] = 20 * 1024 * 1024
+
+# Dataset limits
+MAX_ROWS = 100_000
+MAX_COLUMNS = 100
+
 Path(UPLOAD_FOLDER).mkdir(exist_ok=True)
 
 ALLOWED_EXTENSIONS = {"csv", "xlsx"}
@@ -88,6 +96,7 @@ def set_mode():
         "mode": mode,
         "message": "Interpretation mode saved successfully."
     })
+
 
 
 @app.route("/analyze-question", methods=["POST"])
@@ -131,10 +140,30 @@ def analyze_research_question():
         selected_columns = analysis.get("columns", [])
         identifier = analysis.get("identifier")
 
+        # Check that exactly two columns are selected
         if len(selected_columns) != 2:
+
+            is_arabic = any(
+                "\u0600" <= char <= "\u06FF"
+                for char in question
+            )
+
+            if is_arabic:
+                message = (
+                    "يدعم StatAssist AI حالياً أسئلة البحث التي تتضمن "
+                    "متغيرين فقط. يرجى تعديل سؤال البحث ليحتوي على "
+                    "متغيرين بالضبط."
+                )
+            else:
+                message = (
+                    "StatAssist AI currently supports research questions "
+                    "involving exactly two variables. Please revise your "
+                    "question to include exactly two variables."
+                )
+
             return jsonify({
                 "success": False,
-                "message": "The system could not identify exactly two columns."
+                "message": message
             }), 400
 
         # Check dependency evidence
@@ -148,6 +177,7 @@ def analyze_research_question():
         session["research_question"] = question
         session["selected_columns"] = selected_columns
         session["identifier"] = dependency["identifier"]
+        session["pair_status"] = dependency["pair_status"]
 
         return jsonify({
             "success": True,
@@ -185,6 +215,9 @@ def run_analysis():
     identifier = session.get("identifier")
     question = session.get("research_question")
 
+    # Get pair status from session
+    pair_status = session.get("pair_status")
+
     if not selected_columns or not question:
         return jsonify({
             "success": False,
@@ -198,6 +231,7 @@ def run_analysis():
         }), 400
 
     try:
+
         # 1. Load cleaned dataset
         df = pd.read_csv(cleaned_path)
 
@@ -226,7 +260,11 @@ def run_analysis():
             }), 400
 
         # 5. Get interpretation mode
-        mode = session.get("interpretation_mode", "simple")
+        mode = session.get(
+            "interpretation_mode",
+            "simple"
+        )
+
         print("MODE SENT TO INTERPRETER:", mode)
 
         # 6. Generate interpretation
@@ -241,17 +279,27 @@ def run_analysis():
         visualization_error = None
 
         try:
+
             fig = visualize(
                 df=df,
                 metadata=metadata,
-                selected_columns=selected_columns
+                selected_columns=selected_columns,
+                dependency_type=dependency_type,
+                pair_status=pair_status,
+                identifier=identifier
             )
 
             # Convert Plotly figure to JSON
-            visualization_data = json.loads(fig.to_json())
+            visualization_data = json.loads(
+                fig.to_json()
+            )
 
         except Exception as viz_error:
-            print("Visualization Error:", str(viz_error))
+
+            print(
+                "Visualization Error:",
+                str(viz_error)
+            )
 
             visualization_error = (
                 "Could not generate the visualization."
@@ -262,33 +310,50 @@ def run_analysis():
 
         # 9. Return all results
         response_data = {
-           "success": True,
+
+            "success": True,
+
             "result": result,
-           "interpretation": interpretation,
-           "mode": mode,
-           "visualization": visualization_data,
-           "visualization_error": visualization_error
+
+            "interpretation": interpretation,
+
+            "mode": mode,
+
+            "visualization": visualization_data,
+
+            "visualization_error": visualization_error
+
         }
 
-        safe_response = convert_to_json_safe(response_data)
+        safe_response = convert_to_json_safe(
+            response_data
+        )
 
         return jsonify(safe_response)
 
     except Exception as e:
 
-       print("\n========== ANALYSIS ERROR ==========")
+        print("\n========== ANALYSIS ERROR ==========")
 
-       traceback.print_exc()
+        traceback.print_exc()
 
-       print("Error Details:", repr(e))
+        print("Error Details:", repr(e))
 
-       print("====================================\n")
+        print("====================================\n")
 
-       return jsonify({
-          "success": False,
-          "message": str(e)
+        return jsonify({
+            "success": False,
+            "message": str(e)
         }), 500
-    
+
+
+@app.errorhandler(RequestEntityTooLarge)
+def handle_file_too_large(error):
+    return jsonify({
+        "success": False,
+       "error_type": "dataset_limit",
+"message": "Dataset exceeds the allowed limits. Maximum file size is 20 MB, maximum rows are 100,000, and maximum columns are 100."
+    }), 413    
 
 @app.route("/upload", methods=["POST"])
 def upload_file():
@@ -324,6 +389,22 @@ def upload_file():
 
     # Clean the dataset
     cleaned_df, cleaned_path, metadata = preprocess_dataset(filepath)
+
+    # Check maximum number of rows
+    if len(cleaned_df) > MAX_ROWS:
+        return jsonify({
+            "success": False,
+            "error_type": "dataset_limit",
+            "message": "Dataset exceeds the allowed limits. Maximum file size is 20 MB, maximum rows are 100,000, and maximum columns are 100."
+        }), 400
+
+    # Check maximum number of columns
+    if len(cleaned_df.columns) > MAX_COLUMNS:
+        return jsonify({
+            "success": False,
+            "error_type": "dataset_limit",
+            "message": "Dataset exceeds the allowed limits. Maximum file size is 20 MB, maximum rows are 100,000, and maximum columns are 100."
+        }), 400
 
     session["cleaned_path"] = cleaned_path
 
